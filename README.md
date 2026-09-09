@@ -24,6 +24,7 @@ Nothing is published. The scene, stars, reflections, geometry, wave patterns, an
 - **Click a cube face** while unfolded to turn its nine cells. Shift-click reverses the turn.
 - **Sound** enables a soft harmonic drone and filtered noise. It starts muted. Character 01, the Seed, is silent.
 - The upper-right circular arrow resets the view and cube turns, keeping the chosen character and sound preference.
+- The upper-left **About** icon opens a scrollable note about the artwork, its 27-cell coordinate study, and its relationship to ḍākinī-script inspiration. The scene remains visible behind the reading layer; Escape, clicking outside it, or its X button closes it.
 
 Keyboard: focus the scene and use arrows to rotate, Space/Enter to fold, or X/Y/Z to turn a positive-axis face. Shift reverses a turn. Character arrows and all other controls are keyboard accessible. OS reduced-motion preferences are honored automatically. Motion and audio suspend when the page is hidden.
 
@@ -68,6 +69,8 @@ npm run preview:app
 ```
 
 `dist-app/` contains the entire runnable app. It needs a static HTTP server, with no Vinext, Cloudflare, AI service, or separate backend at runtime. The original local development and build commands remain available.
+
+For the configured static Site deployment, run `npm run build:site`; it emits the same app to `dist/` for packaging.
 
 Aukora mounts a pinned build at `/stock-apps/dakini-code/index.html`, opened from the circle menu's **User Apps → Dakini Code** entry. Updating that copy means building this repository at the desired commit, copying `dist-app/` into the host's `ui-stock-apps/vendor/dakini-code/`, and refreshing its provenance manifest. No second server on port 3000 is needed for the embedded app.
 

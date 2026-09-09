@@ -2,6 +2,7 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {Box,ChevronLeft,ChevronRight,RotateCcw,Volume2,VolumeX,Plus,Minus} from 'lucide-react';
 import {Toggle} from '@/components/ui/toggle';
+import {AboutDakiniCode} from '@/app/about';
 import type {Space} from '@/lib/space';
 
 export default function Home(){
@@ -28,6 +29,7 @@ export default function Home(){
   };
   return <main className="space-study">
     <header>DAKINI CODE</header>
+    <AboutDakiniCode />
     <button className="reset" disabled={!ready} onClick={reset} aria-label="Reset view and cube" title="Reset view and cube"><RotateCcw size={18}/></button>
     <div className="glyph-space" ref={host} data-testid="glyph-space"/>
     {failed&&<div className="render-error" role="alert"><p>The 3D view couldn't start.</p><button onClick={()=>location.reload()}>Try again</button><span>Hardware acceleration needs to be enabled in your browser.</span></div>}
