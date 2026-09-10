@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Dakini browser verification</title>
+<style>body{font:16px/1.6 system-ui;background:#142a36;color:#eaf8ff;padding:24px}button{padding:12px;margin:8px;cursor:pointer}pre{white-space:pre-wrap}iframe{width:390px;height:844px;border:1px solid #cfe9da}</style></head>
+<body><h1>Dakini browser verification</h1><button id="run">Run offline audio verification</button><pre id="results">Ready. This verification page is excluded from production builds.</pre>
+<h2>Embedded mobile lifecycle fixture</h2><button id="show">Activate surface</button><button id="hide">Hide surface</button><p id="lifecycle">No fixture report yet.</p>
+<iframe id="fixture" title="Mobile Dakini fixture" src="./fixture.html" allow="autoplay"></iframe>
+<script type="module">
+import {createHarmonicGraph} from '../lib/harmonic-voice.ts';
+import {coefficients,NORMALIZATION} from '../lib/harmonic-model.ts';
+const output=document.querySelector('#results');
+document.querySelector('#run').onclick=async()=>{
+ output.textContent='Rendering twelve sine partials for all twenty-seven states…';
+ try{
+   let maxError=0,maxPeak=0;
+   for(let id=0;id<27;id++){
+     const rate=48000,ctx=new OfflineAudioContext(1,rate*.6,rate);
+     const graph=createHarmonicGraph(ctx,140,0,0,ctx.destination);
+     graph.volume(.5,0);graph.select(id,.25);graph.volume(0,.5);graph.stop(.6);
+     const buffer=await ctx.startRendering(),data=buffer.getChannelData(0);
+     for(const n of data)maxPeak=Math.max(maxPeak,Math.abs(n));
+     for(const [time,state] of [[.1,0],[.35,id]]){
+       const start=Math.round(time*rate),length=4800;
+       for(let k=1;k<=12;k++){
+         let sine=0,cosine=0;
+         for(let n=0;n<length;n++){const phase=2*Math.PI*k*140*(start+n)/rate;sine+=data[start+n]*Math.sin(phase);cosine+=data[start+n]*Math.cos(phase);}
+         const measured=2*Math.hypot(sine,cosine)/length,expected=.5/NORMALIZATION*coefficients(state)[k-1];
+         maxError=Math.max(maxError,Math.abs(measured-expected));
+       }
+     }
+     for(let n=Math.round(.56*rate);n<data.length;n++)if(Math.abs(data[n])>1e-6)throw Error('End fade did not reach silence.');
+     graph.disconnect();
+   }
+   if(maxError>1e-5)throw Error('Spectral error exceeds 0.00001: '+maxError);
+   if(maxPeak>.5+1e-6)throw Error('Analytic peak bound exceeded: '+maxPeak);
+   output.textContent='PASS · 27 OfflineAudioContext renders · 648 partial comparisons\n48 kHz, rectangular 100 ms windows at 0.1 s and 0.35 s. Integer cycles; absolute amplitude tolerance 0.00001.\nMaximum coefficient error: '+maxError+'\nMaximum digital peak: '+maxPeak+' (bound 0.5)\nStart, state-transition and end fades checked. No speaker listening is implied.';
+ }catch(error){output.textContent='FAIL · '+error.message;}
+};
+const frame=document.querySelector('#fixture');
+const active=value=>frame.contentWindow.postMessage({source:'aukora-shell',type:'surface-active',app:'dakini-code',active:value},location.origin);
+document.querySelector('#show').onclick=()=>active(true);
+document.querySelector('#hide').onclick=()=>active(false);
+addEventListener('message',event=>{if(event.origin===location.origin&&event.source===frame.contentWindow&&event.data?.source==='dakini-test')document.querySelector('#lifecycle').textContent=event.data.report;});
+</script></body></html>
