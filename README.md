@@ -2,6 +2,8 @@
 
 A calligraphic world and a small musical instrument: 27 curved characters, a ternary cube, a projected tesseract, Ambient sound, and a fixed-tone Harmonic Lab.
 
+**Observer** adds a local experiment in ternary information and verification. Its 27 independently editable trits are a separate model from Harmonic Lab's 27 choices. Source changes, line-sum checks, six reversible face readings, a signed reference, and a base-seven digest display can be inspected interactively. **Run the checks** repeats the exhaustive experiment in a browser worker; **Export test results** saves its measured results. The mathematical findings and proposed Aura handoff are in [OBSERVER-EXPERIMENT.md](OBSERVER-EXPERIMENT.md).
+
 ## Open locally
 
 The commands below serve the app at **http://localhost:3000/**. Open that address in Safari, Chrome, or another regular browser; Codex is not required to view it while the server is running. The existing Aukora installation also opens its bundled copy through **http://localhost:5173/** → circle menu → User Apps → Dakini Code.
@@ -22,7 +24,7 @@ The source repository is public. The scene and sound are generated locally, incl
 - **Drag** rotates the whole object; scroll or pinch changes viewing distance.
 - **Cube** shows or hides the lattice, tesseract, and wave panes.
 - **Click a cube face** while unfolded to turn its nine cells. Shift-click reverses the turn.
-- **Ambient / Harmonic Lab** selects the sound model. Switching while muted stays silent. **Start sound / Mute** is a separate control.
+- **Ambient / Harmonic Lab** selects the sound model. Switching while muted stays silent. **Start sound / Mute** is a separate control. Entering **Observer** suspends sound and pauses Harmonic Lab playback; its experiment stays in memory when switching views.
 - In **Ambient**, Sound enables the original harmonic drone and filtered noise. Character 01, the Seed, is silent.
 - In **Harmonic Lab**, three Soft / Medium / Strong controls select an existing character while shaping its fourth, sixth, and eighth harmonics. Character 01 is Medium / Medium / Medium and is audible when enabled.
 - The upper-right circular arrow resets the view and cube turns, keeping the chosen character and sound preference.

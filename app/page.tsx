@@ -5,13 +5,14 @@ import {Toggle} from '@/components/ui/toggle';
 import {AboutDakiniCode} from '@/app/about';
 import {HarmonicLab} from '@/components/harmonic-lab';
 import {useHarmonicLab} from '@/components/use-harmonic-lab';
+import {ObserverLab} from '@/components/observer-lab';
 import type {Space} from '@/lib/space';
 
 export default function Home(){
   const host=useRef<HTMLDivElement>(null),space=useRef<Space|null>(null),openRef=useRef(false),characterRef=useRef(4);
   const [open,setOpen]=useState(false),[ready,setReady]=useState(false),[failed,setFailed]=useState(false);
   const [character,setCharacter]=useState(4),[cube,setCube]=useState(true),[sound,setSound]=useState(false),[audioBusy,setAudioBusy]=useState(false),[audioError,setAudioError]=useState(false);
-  const [mode,setMode]=useState<'ambient'|'lab'>('ambient');
+  const [mode,setMode]=useState<'ambient'|'lab'|'observer'>('ambient');
   const modeRef=useRef(mode),request=useRef(0),mounted=useRef(true),busyRef=useRef(false);
   const toggle=useCallback(()=>{const next=!openRef.current;openRef.current=next;setOpen(next);space.current?.setUnfolded(next);},[]);
   const reset=useCallback(()=>{openRef.current=false;setOpen(false);space.current?.reset();},[]);
@@ -39,7 +40,7 @@ export default function Home(){
     }catch{if(mounted.current){setSound(false);setAudioError(true);}}
     finally{busyRef.current=false;if(mounted.current)setAudioBusy(false);}
   };
-  const changeMode=async(next:'ambient'|'lab')=>{
+  const changeMode=async(next:'ambient'|'lab'|'observer')=>{
     if(next===modeRef.current||busyRef.current)return;
     const token=++request.current,wasOn=sound;
     busyRef.current=true;setAudioBusy(true);setSound(false);setAudioError(false);
@@ -52,22 +53,23 @@ export default function Home(){
       if(!mounted.current||token!==request.current)return;
       modeRef.current=next;setMode(next);
       if(next==='lab')lab.choose(characterRef.current);
-      if(wasOn&&!document.hidden&&document.documentElement.dataset.surfaceActive!=='false'){
+      if(wasOn&&next!=='observer'&&!document.hidden&&document.documentElement.dataset.surfaceActive!=='false'){
         const active=next==='lab'?await lab.setSound(true):await space.current?.setSound(true)??false;
         if(mounted.current&&token===request.current){setSound(active);setAudioError(!active);}
       }
     }catch{if(mounted.current)setAudioError(true);}
     finally{busyRef.current=false;if(mounted.current)setAudioBusy(false);}
   };
-  return <main className={'space-study'+(mode==='lab'?' lab-enabled':'')} data-sound-mode={mode}>
+  return <main className={'space-study'+(mode==='lab'?' lab-enabled':'')+(mode==='observer'?' observer-enabled':'')} data-sound-mode={mode}>
     <header>DAKINI CODE</header>
     <AboutDakiniCode/>
     <button className="reset" disabled={!ready} onClick={reset} aria-label="Reset view and cube" title="Reset view and cube"><RotateCcw size={18}/></button>
-    <div className="mode-switch" aria-label="Sound mode">
+    <div className="mode-switch" aria-label="Explore Dakini">
       <button aria-pressed={mode==='ambient'} disabled={audioBusy} onClick={()=>void changeMode('ambient')}>Ambient</button>
       <button aria-pressed={mode==='lab'} disabled={audioBusy} onClick={()=>void changeMode('lab')}>Harmonic Lab</button>
+      <button aria-pressed={mode==='observer'} disabled={audioBusy} onClick={()=>void changeMode('observer')}>Observer</button>
     </div>
-    <div className="glyph-space" ref={host} data-testid="glyph-space"/>
+    <div className="glyph-space" ref={host} data-testid="glyph-space" aria-hidden={mode==='observer'} inert={mode==='observer'}/>
     {failed&&<div className="render-error" role="alert"><p>The 3D view could not start.</p><button onClick={()=>location.reload()}>Try again</button><span>Hardware acceleration needs to be enabled in your browser.</span></div>}
     <div className="simple-controls">
       <div className="character-picker" aria-label="Choose a character">
@@ -84,5 +86,6 @@ export default function Home(){
       {audioError&&<output>Sound could not start. Tap Start sound to retry.</output>}
     </div>
     {mode==='lab'&&<HarmonicLab lab={lab} id={character}/>}
+    <ObserverLab active={mode==='observer'} onSymbol={select}/>
   </main>;
 }
